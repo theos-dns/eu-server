@@ -1,0 +1,53 @@
+version: "3.9"
+services:
+  theos-auth:
+    container_name: theos-auth
+    image: ghcr.io/theos-dns/auth:latest
+    network_mode: host
+    environment:
+      - FORWARD_TO=forward-proxy
+      - PORTS=443
+      - DB_PATH=/root/app/auth/db/database.sqlite3
+      - UPSTREAM=
+    volumes:
+      - ${PWD}/database-auth.sqlite3:/root/app/auth/db/database.sqlite3
+      - /etc/hosts:/etc/hosts
+      - allowedIps:/var/nginx
+
+
+  forward-proxy:
+    container_name: forward-proxy
+    image: ghcr.io/mrmohebi/froward-proxy:latest
+    command: -port 80,443 -log-level debug
+
+
+
+  docker-hoster:
+    container_name: docker-hoster
+    image: dvdarias/docker-hoster
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
+      - /etc/hosts:/tmp/hosts
+
+  xray-ui:
+    container_name: marzban
+    image: ghcr.io/gozargah/marzban:v0.6.0
+    environment:
+      - SUDO_USERNAME=root
+      - SUDO_PASSWORD=REPLACE_WITH_YOUR_PasSW0RD
+    ports:
+      - "83:8000"
+      - "90:8081" # VMess TCP
+      - "91:8080" # VMess Websocket
+      - "92:8443" # VLESS TCP REALITY
+      - "93:2053" # VLESS GRPC REALITY
+      - "94:2083" # Trojan Websocket TLS
+    volumes:
+      - marzban:/var/lib/marzban
+      - marzban-conf:/opt/marzban
+
+
+volumes:
+  allowedIps:
+  marzban:
+  marzban-conf:
