@@ -42,6 +42,7 @@ services:
       - "92:8443" # VLESS TCP REALITY
       - "93:2053" # VLESS GRPC REALITY
       - "94:2083" # Trojan Websocket TLS
+      - "95:1080" # Shadowsocks TCP
     volumes:
       - marzban:/var/lib/marzban
       - marzban-conf:/opt/marzban
