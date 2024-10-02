@@ -1,14 +1,35 @@
 version: "3.9"
 services:
+  local-resolver:
+    container_name: local-resolver
+    image: ghcr.io/0xerr0r/blocky:v0.24
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:153:53/udp"
+    volumes:
+      - ./blocky.yaml:/app/config.yml
+      - /etc/hosts:/etc/hosts
+
+  docker-hoster:
+    container_name: docker-hoster
+    image: dvdarias/docker-hoster
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
+      - /etc/hosts:/tmp/hosts
+
   theos-auth:
     container_name: theos-auth
     image: ghcr.io/theos-dns/auth:latest
     network_mode: host
     environment:
       - FORWARD_TO=forward-proxy
-      - PORTS=443
+      - PORTS=80,443
       - DB_PATH=/root/app/auth/db/database.sqlite3
-      - UPSTREAM=
+      - UPSTREAM=${UPSTREAMS}
+      - PROTECT=
+      - STARTUP_SLEEP=5
+      - RESOLVER=127.0.0.1:153
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
     volumes:
       - ${PWD}/database-auth.sqlite3:/root/app/auth/db/database.sqlite3
       - /etc/hosts:/etc/hosts
@@ -21,20 +42,12 @@ services:
     command: -port 80,443 -log-level debug
 
 
-
-  docker-hoster:
-    container_name: docker-hoster
-    image: dvdarias/docker-hoster
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock
-      - /etc/hosts:/tmp/hosts
-
   xray-ui:
     container_name: marzban
     image: ghcr.io/gozargah/marzban:v0.6.0
     environment:
-      - SUDO_USERNAME=root
-      - SUDO_PASSWORD=REPLACE_WITH_YOUR_PasSW0RD
+      - SUDO_USERNAME=${XRAY_UI_USERNAME}
+      - SUDO_PASSWORD=${XRAY_UI_PASSWORD}
     ports:
       - "83:8000"
       - "90:8081" # VMess TCP
