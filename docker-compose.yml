@@ -48,6 +48,7 @@ services:
     environment:
       - SUDO_USERNAME=${XRAY_UI_USERNAME}
       - SUDO_PASSWORD=${XRAY_UI_PASSWORD}
+      - SQLALCHEMY_DATABASE_URL=sqlite:////home/db.sqlite3
     ports:
       - "83:8000"
       - "90:8081" # VMess TCP
@@ -59,9 +60,11 @@ services:
     volumes:
       - marzban:/var/lib/marzban
       - marzban-conf:/opt/marzban
+      - marzban-db:/home
 
 
 volumes:
   allowedIps:
   marzban:
   marzban-conf:
+  marzban-db:
